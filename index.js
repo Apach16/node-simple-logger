@@ -9,13 +9,16 @@ const requestHandler = (request, response) => {
 
   if (request.method === 'POST' && contentType === 'APPLICATION/JSON') {
     const file = fs.createWriteStream('./log.txt', { 'flags': 'a' });
-    date = new Date();
-    file.write(`[${date}]\n`)
-    request.on('end', () => {
-      file.end(`\r\n`);
-      response.end('ok');
-    });
-    request.pipe(file)
+    file.on('pipe', () => {
+      const date = new Date();
+      file.write(`[${date}]\n`)
+    })
+    request
+      .on('end', () => {
+        file.end(`\r\n`);
+        response.end('ok');
+      })
+      .pipe(file)
   } else {
     response.statusCode = 404;
     response.end();
